@@ -1,0 +1,261 @@
+CREATE TABLE Cases (
+  ID SERIAL PRIMARY KEY,
+  Patient_Summary VARCHAR(2550)
+);
+
+CREATE TABLE Case_Patient_Questions (
+  Question_ID INT PRIMARY KEY,
+  Case_ID INT,
+  Question VARCHAR(2550),
+  FOREIGN KEY (Case_ID) REFERENCES Cases (ID)
+);
+
+CREATE TABLE Research_question_processed (
+  Research_Question_ID INT PRIMARY KEY,
+  Case_ID INT,
+  Question_ID INT,
+  Question VARCHAR(2550),
+  Question_Note VARCHAR(2550),
+  FOREIGN KEY (Case_ID) REFERENCES Cases (ID),
+  FOREIGN KEY (Question_ID) REFERENCES Case_Patient_Questions(Question_ID)
+);
+
+CREATE TABLE Enchanced (
+  ID INT PRIMARY KEY,
+  Case_ID INT,
+  Research_Question_ID INT,
+  Patient VARCHAR(2550),
+  Disease TEXT,
+  Treatment TEXT,
+  Question_Type TEXT,
+  FOREIGN KEY (Case_ID) REFERENCES Cases (ID),
+  FOREIGN KEY (Research_Question_ID) REFERENCES Research_question_processed(Research_Question_ID),
+  FOREIGN KEY (Disease) REFERENCES Disease_table(Object_ID),
+  FOREIGN KEY (Treatment) REFERENCES Treatments(Object_ID),
+  FOREIGN KEY (Question_Type) REFERENCES Question_Types(Object_ID)
+);
+
+CREATE TABLE Articles (
+  Article_ID INT PRIMARY KEY,
+  Case_ID INT,
+  Research_Question_ID INT,
+  Reference VARCHAR(2550),
+  Highlighted_text VARCHAR(2550),
+  Alternative_pubmed_link VARCHAR(2550),
+  FOREIGN KEY (Case_ID) REFERENCES Cases (ID),
+  FOREIGN KEY (Research_Question_ID) REFERENCES Research_Question_Processed(Research_Question_ID)
+);
+
+CREATE TABLE Patient_Table (
+  Object_ID TEXT PRIMARY KEY,
+  Object_Name VARCHAR(2550),
+  Object_Classification VARCHAR(2550),
+  Object_Sub_Classification VARCHAR(2550)
+);
+
+CREATE TABLE Disease_Table (
+  Object_ID TEXT PRIMARY KEY,
+  Object_Name VARCHAR(2550),
+  Object_Classification VARCHAR(2550),
+  Object_Sub_Classification VARCHAR(2550)
+);
+
+CREATE TABLE Question_Types (
+  Object_ID TEXT PRIMARY KEY,
+  Object_Name VARCHAR(2550),
+  Object_Classification VARCHAR(2550),
+  Object_Sub_Classification VARCHAR(2550)
+);
+
+CREATE TABLE Treatments (
+  Object_ID TEXT PRIMARY KEY,
+  Object_Name VARCHAR(2550),
+  Object_Classification VARCHAR(2550),
+  Object_Sub_Classification VARCHAR(2550),
+  Object_Sub_Classification_2 VARCHAR(2550)
+);
+
+CREATE TABLE Case_Disease (
+  ID SERIAL PRIMARY KEY,
+  Case_ID INT,
+  Disease_ID TEXT,
+  FOREIGN KEY (Case_ID) REFERENCES Cases (ID),
+  FOREIGN KEY (Disease_ID) REFERENCES Disease_Table(Object_ID)
+);
+
+CREATE TABLE Case_Treatment (
+  ID SERIAL PRIMARY KEY,
+  Case_ID INT,
+  Treatment_ID TEXT,
+  FOREIGN KEY (Case_ID) REFERENCES Cases (ID),
+  FOREIGN KEY (Treatment_ID) REFERENCES Treatments(Object_ID)
+);
+
+CREATE TABLE Case_Question_Type (
+  ID SERIAL PRIMARY KEY,
+  Case_ID INT,
+  Question_Type_ID TEXT,
+  FOREIGN KEY (Case_ID) REFERENCES Cases (ID),
+  FOREIGN KEY (Question_Type_ID) REFERENCES Question_Types(Object_ID)
+);
+
+
+-----------------------------------USER TABLE-------------------------------------------------
+CREATE TABLE Users (
+  User_ID SERIAL PRIMARY KEY,
+  Username VARCHAR(255) UNIQUE NOT NULL,
+  Password VARCHAR(255) NOT NULL,
+  Email VARCHAR(255) UNIQUE NOT NULL,
+  Created_At TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  Last_Login TIMESTAMP
+);
+
+CREATE TABLE User_Actions (
+  Action_ID SERIAL PRIMARY KEY,
+  User_ID INT REFERENCES Users(User_ID),
+  Action_Type VARCHAR(2550),
+  Action_Description VARCHAR(2550),
+  Action_Timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+--------------------------------Assiciation tables---------------------------------------------
+--Associations tables for Cases
+
+CREATE TABLE cp_objects (
+  Case_ID INT,
+  Patient_Object_ID TEXT,
+  FOREIGN KEY (Case_ID) REFERENCES Cases(ID),
+  FOREIGN KEY (Patient_Object_ID) REFERENCES Patient_Table(Object_ID),
+  PRIMARY KEY (Case_ID, Patient_Object_ID)
+);
+
+
+CREATE TABLE cd_objects (
+  Case_ID INT,
+  Disease_Object_ID TEXT,
+  FOREIGN KEY (Case_ID) REFERENCES Cases(ID),
+  FOREIGN KEY (Disease_Object_ID) REFERENCES Disease_Table(Object_ID),
+  PRIMARY KEY (Case_ID, Disease_Object_ID)
+);
+
+
+CREATE TABLE cq_objects (
+  Case_ID INT,
+  Question_Object_ID TEXT,
+  FOREIGN KEY (Case_ID) REFERENCES Cases(ID),
+  FOREIGN KEY (Question_Object_ID) REFERENCES Question_Types(Object_ID),
+  PRIMARY KEY (Case_ID, Question_Object_ID)
+);
+
+CREATE TABLE ct_objects (
+  Case_ID INT,
+  Treatment_Object_ID TEXT,
+  FOREIGN KEY (Case_ID) REFERENCES Cases(ID),
+  FOREIGN KEY (Treatment_Object_ID) REFERENCES Treatments(Object_ID),
+  PRIMARY KEY (Case_ID, Treatment_Object_ID)
+);
+
+--------------------------------------------------------------------
+
+
+CREATE TABLE rq_patient_objects (
+  Research_Question_ID INT,
+  Patient_Object_ID TEXT,
+  FOREIGN KEY (Research_Question_ID) REFERENCES Research_question_processed(Research_Question_ID),
+  FOREIGN KEY (Patient_Object_ID) REFERENCES Patient_Table(Object_ID),
+  PRIMARY KEY (Research_Question_ID, Patient_Object_ID)
+);
+
+
+CREATE TABLE rq_disease_objects (
+  Research_Question_ID INT,
+  Disease_Object_ID TEXT,
+  FOREIGN KEY (Research_Question_ID) REFERENCES Research_question_processed(Research_Question_ID),
+  FOREIGN KEY (Disease_Object_ID) REFERENCES Disease_Table(Object_ID),
+  PRIMARY KEY (Research_Question_ID, Disease_Object_ID)
+);
+
+CREATE TABLE rq_question_objects (
+  Research_Question_ID INT,
+  Question_Object_ID TEXT,
+  FOREIGN KEY (Research_Question_ID) REFERENCES Research_question_processed(Research_Question_ID),
+  FOREIGN KEY (Question_Object_ID) REFERENCES Question_Types(Object_ID),
+  PRIMARY KEY (Research_Question_ID, Question_Object_ID)
+);
+
+CREATE TABLE rq_treatment_objects (
+  Research_Question_ID INT,
+  Treatment_Object_ID TEXT,
+  FOREIGN KEY (Research_Question_ID) REFERENCES Research_question_processed(Research_Question_ID),
+  FOREIGN KEY (Treatment_Object_ID) REFERENCES Treatments(Object_ID),
+  PRIMARY KEY (Research_Question_ID, Treatment_Object_ID)
+);
+
+
+--------------------------------------------------------------------------
+CREATE TABLE articles_patient_objects (
+  Article_ID INT,
+  Patient_Object_ID TEXT,
+  FOREIGN KEY (Article_ID) REFERENCES Articles(Article_ID),
+  FOREIGN KEY (Patient_Object_ID) REFERENCES Patient_Table(Object_ID),
+  PRIMARY KEY (Article_ID, Patient_Object_ID)
+);
+
+CREATE TABLE articles_disease_objects (
+  Article_ID INT,
+  Disease_Object_ID TEXT,
+  FOREIGN KEY (Article_ID) REFERENCES Articles(Article_ID),
+  FOREIGN KEY (Disease_Object_ID) REFERENCES Disease_Table(Object_ID),
+  PRIMARY KEY (Article_ID, Disease_Object_ID)
+);
+
+CREATE TABLE articles_question_objects (
+  Article_ID INT,
+  Question_Object_ID TEXT,
+  FOREIGN KEY (Article_ID) REFERENCES Articles(Article_ID),
+  FOREIGN KEY (Question_Object_ID) REFERENCES Question_Types(Object_ID),
+  PRIMARY KEY (Article_ID, Question_Object_ID)
+);
+
+CREATE TABLE articles_treatment_objects (
+  Article_ID INT,
+  Treatment_Object_ID TEXT,
+  FOREIGN KEY (Article_ID) REFERENCES Articles(Article_ID),
+  FOREIGN KEY (Treatment_Object_ID) REFERENCES Treatments(Object_ID),
+  PRIMARY KEY (Article_ID, Treatment_Object_ID)
+);
+
+
+-----------------------------------------------------------------------------------------------
+CREATE TABLE cpq_patient_objects (
+  Question_ID INT,
+  Patient_Object_ID TEXT,
+  FOREIGN KEY (Question_ID) REFERENCES Case_Patient_Questions(Question_ID),
+  FOREIGN KEY (Patient_Object_ID) REFERENCES Patient_Table(Object_ID),
+  PRIMARY KEY (Question_ID, Patient_Object_ID)
+);
+
+CREATE TABLE cpq_disease_objects (
+  Question_ID INT,
+  Disease_Object_ID TEXT,
+  FOREIGN KEY (Question_ID) REFERENCES Case_Patient_Questions(Question_ID),
+  FOREIGN KEY (Disease_Object_ID) REFERENCES Disease_Table(Object_ID),
+  PRIMARY KEY (Question_ID, Disease_Object_ID)
+);
+
+CREATE TABLE cpq_question_objects (
+  Question_ID INT,
+  Question_Object_ID TEXT,
+  FOREIGN KEY (Question_ID) REFERENCES Case_Patient_Questions(Question_ID),
+  FOREIGN KEY (Question_Object_ID) REFERENCES Question_Types(Object_ID),
+  PRIMARY KEY (Question_ID, Question_Object_ID)
+);
+
+CREATE TABLE cpq_treatment_objects (
+  Question_ID INT,
+  Treatment_Object_ID TEXT,
+  FOREIGN KEY (Question_ID) REFERENCES Case_Patient_Questions(Question_ID),
+  FOREIGN KEY (Treatment_Object_ID) REFERENCES Treatments(Object_ID),
+  PRIMARY KEY (Question_ID, Treatment_Object_ID)
+);
